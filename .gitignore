@@ -1,0 +1,16 @@
+#output folders
+*/obj/*
+*/bin/*
+*/lib/*
+#qt cretaor files
+*.creator
+*.config
+*.creator.user
+*.includes
+*.files
+#latex leftovers
+*.log
+*.fls
+*.aux
+*.fdb_latexmk
+*.out

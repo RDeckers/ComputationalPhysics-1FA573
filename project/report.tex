@@ -1,0 +1,27 @@
+\input{./preamble.tex}
+\begin{document}
+  \maketitle[Computational Physics]{Project}
+\section{Task 1}
+\subsection{Analytical Solution to the Potential Well/Barrier Problem}
+start with
+\begin{align}
+  \int \frac{\d r}{r^2\sqrt{1-\frac{b^2}{r^2}-a}}
+\end{align}
+and subsitute $x = b/r$, $\d x = -b/r^2 \d r$ giving:
+\begin{align}
+  &\int \frac{\d x}{-b\sqrt{1-x^2-a}}\nn
+  =&\int \frac{\d x \sqrt{\frac{1}{1-a}}}{-b \sqrt{1-a-x^2}\sqrt{\frac{1}{1-a}}}\nn
+  =&-\frac{1}{b\sqrt{1-a}}\int\frac{\d x}{\sqrt{1-\left(\frac{x}{\sqrt{1-a}}\right)^2}}
+\end{align}
+now subsitute $u = x/\sqrt{1-a}$ and $\d u = \d x/\sqrt{1-a}$:
+\begin{align}
+  &-\frac{1}{b}\int\frac{\d u}{\sqrt{1-u^2}}\nn
+  = &-\frac{1}{b} \arcsin u
+\end{align}
+Now all that is left is backsubsitution of $u\to x \to r$, which leads to:
+\begin{align}
+  &-\frac{1}{b} \arcsin u\nn
+  =&-\frac{1}{b} \arcsin \frac{x}{\sqrt{1-a}}\nn
+  \int \frac{\d r}{r^2\sqrt{1-\frac{b^2}{r^2}-a}}=&-\frac{1}{b} \arcsin \frac{b}{r\sqrt{1-a}}
+\end{align}
+\end{document}
