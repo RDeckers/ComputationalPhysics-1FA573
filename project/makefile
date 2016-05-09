@@ -11,6 +11,7 @@ FIX_PATH = $(subst /,\,$1)
 	INSTALL_LIB_DIR := Z:/lib/
 	INSTALL_BIN_DIR := Z:/bin/
 	INSTALL_INCLUDE_DIR := Z:/include/
+	EXE_SUFFIX = .exe
 	LIB_SUFFIX =.dll
 else
 	REPORT = @echo -e "\e[4;1;37m$1\033[0m"
@@ -21,6 +22,7 @@ else
 	INSTALL_LIB_DIR := ~/lib/
 	INSTALL_BIN_DIR := ~/bin/
 	INSTALL_INCLUDE_DIR := ~/include/
+	EXE_SUFFIX =
 	LIB_SUFFIX :=.so
 endif
 
@@ -36,7 +38,8 @@ PLOTS_GNUPLOT := $(call rwildcard, $(PLOTS_DIR), *.gnuplot)
 PLOTS_PNG := $(patsubst %.gnuplot, %.png, $(PLOTS_GNUPLOT))
 C_FILES := $(wildcard $(SRC_DIR)/*.c)
 SCRIPTS := $(wildcard $(SCRIPT_DIR)/*.sh)
-BINARIES := $(patsubst $(SRC_DIR)/%.c,$(BIN_DIR)/%,$(C_FILES))
+BINARIES := $(patsubst $(SRC_DIR)/%.c,$(BIN_DIR)/%$(EXE_SUFFIX),$(C_FILES))
+DATA_FILES := $(patsubst $(SRC_DIR)/%.c,$(DATA_DIR)/%.dat,$(C_FILES))
 
 COMMON_C_FILES := $(wildcard $(SRC_DIR)/common/*.c)
 OBJ_FILES = $(patsubst $(SRC_DIR)/common/%.c,$(OBJ_DIR)/%.o,$(COMMON_C_FILES))
@@ -44,7 +47,7 @@ OBJ_FILES = $(patsubst $(SRC_DIR)/common/%.c,$(OBJ_DIR)/%.o,$(COMMON_C_FILES))
 LD_FLAGS += --std=gnu99 -march=native -lutilities -L$(INSTALL_LIB_DIR)
 C_FLAGS += --std=gnu99 -O2 -pipe -I$(PROJECT_DIR)headers -I$(INSTALL_INCLUDE_DIR)
 
-.SECONDARY: $(OBJ_FILES)
+.PRECIOUS: $(OBJ_FILES) $(DATA_FILES)
 
 all: report binaries
 
@@ -55,14 +58,20 @@ report: plots
 all : binaries plots
 
 binaries: $(BINARIES)
+	$(call REPORT, binaries = $(BINARIES))
 
 plots: $(PLOTS_PNG)
+
+$(DATA_DIR)/%.dat : $(BIN_DIR)/%$(EXE_SUFFIX)
+	$(call REPORT,running $<)
+	$(call CHK_DIR_EXISTS, $(DATA_DIR))
+	$< > $@
 
 $(PLOTS_DIR)/%.png : $(DATA_DIR)/%.dat $(PLOTS_DIR)/%.gnuplot
 	$(call REPORT,Building $@)
 	gnuplot -e "output_file='$@';term_type='png'" -c "$(patsubst %.png,%.gnuplot,$@)"
 
-$(BIN_DIR)% : $(SRC_DIR)/%.c $(OBJ_FILES)
+$(BIN_DIR)%$(EXE_SUFFIX) : $(SRC_DIR)/%.c $(OBJ_FILES)
 	$(call REPORT,Building $@)
 	$(call CHK_DIR_EXISTS, $(dir $@))
 	gcc $(C_FLAGS) -o "$@" "$<" $(OBJ_FILES) $(LD_FLAGS)

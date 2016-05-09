@@ -125,7 +125,7 @@ typedef struct{
 
 gk_settings_t DEFAULT_GK_SETTINGS = {
   .abs_err = 1e-9, //TODO: use 10 & 21 instead?
-  .rel_err = 0//1e-12
+  .rel_err = 0
 };
 
 gk_step_out_t gk_step(double(*f)(double,void*), void* args, double a, double b, const double *nodes, const double *wg, const double *wk, const unsigned n){

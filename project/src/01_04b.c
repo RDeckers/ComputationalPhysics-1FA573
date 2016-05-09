@@ -68,7 +68,7 @@ double exact_integrand(double r, double b){
 
 
 double realistically_approximated(double a, double b, double c){
-  double r_max = 60*c;
+  double r_max = 3*c;
   double result = 0;
   if(b < r_max){//only effected if we approach close enough
     result += exact_integrand(r_max, b) - exact_integrand(b, b);
@@ -76,9 +76,9 @@ double realistically_approximated(double a, double b, double c){
     //report(INFO, "starting root-finding for %f %f %f",a ,b, c);
     double r_min = -1e20;
     for(unsigned order = 12; order != 0; order--){
-      double root = poly_hm(poly, r_max, 1e-9, 1 << 14);
+      double root = poly_hm(poly, r_max, 1e-10, 1 << 14);
       double remainder = poly_factor_out(poly, root);
-      if(fabs(remainder) > 1e-3){
+      if(fabs(remainder) > 1e-6){
         //report(WARN, "stopping at order %u because no root was found", order);
         break;
       }
@@ -87,6 +87,7 @@ double realistically_approximated(double a, double b, double c){
       }
       //report(PASS, "Found root %f, remainder = %f", root, remainder);
     }
+    // double r_min = fabs(poly_hm(poly, r_max, 1e-9));
     //return r_min;
     //report(PASS, "rmin = %f", r_min);
     f_args args = create_approximated_fargs(a, b, c, r_min,  r_max);
@@ -100,19 +101,22 @@ double realistically_approximated(double a, double b, double c){
 }
 
 int main(int argc, char** argv){
-  //double b = 0.05;
-  double a = 1e+1;
   double c = 1;
   for(double a = 1e2; a >= 1e-2; a /= 5){
     printf("\"ε/E = %.2e\"\n", a);
-    for(double b = 1e-6; b <= 6*c; b += 6*c/500){
-      double approximation_3 = realistically_approximated(a, b, c);
-      double gamma = 4*a/(b*b);
-      printf("%f %e %e\n", b, approximation_3, gamma);
+    for(double b = 1e-6; b <= 3*c; b += 3*c/100){
+      double center = realistically_approximated(a, b, c);
+      /*if(center != 0)*/{
+        double h = 6*c/500;
+        double left = realistically_approximated(a, b-h, c);
+        double right = realistically_approximated(a, b+h, c);
+        double cross_section = b/sin(center)*fabs((2*h)/(right-left));
+        printf("%f %e\n", center, cross_section);
+      }
       //report(PASS,"\t%e %e",a,b);
     }
     puts("\n");
-    report(PASS, "%e", a);
+    //report(PASS, "%e", a);
   }
   return 0;
 }

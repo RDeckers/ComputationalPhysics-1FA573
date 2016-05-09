@@ -101,18 +101,30 @@ double realistically_approximated(double a, double b, double c){
 
 int main(int argc, char** argv){
   //double b = 0.05;
-  double a = 1e+1;
+  double a = 1.2;
+  double step_size = 0.1;
+  double upper_b_limit = 2.0;
+  double min_loc;
   double c = 1;
-  for(double a = 1e2; a >= 1e-2; a /= 5){
-    printf("\"ε/E = %.2e\"\n", a);
-    for(double b = 1e-6; b <= 6*c; b += 6*c/500){
+  while(step_size >= 1e-10){
+    a -= step_size;
+    //printf("\"ε/E = %.2e\"\n", a);
+    double minimum = 1e200;
+    for(double b = 1.2; b <= upper_b_limit; b += 1e-3){
       double approximation_3 = realistically_approximated(a, b, c);
-      double gamma = 4*a/(b*b);
-      printf("%f %e %e\n", b, approximation_3, gamma);
-      //report(PASS,"\t%e %e",a,b);
+      if(approximation_3 < minimum){
+        minimum = approximation_3;
+        min_loc = b;
+      }
     }
-    puts("\n");
-    report(PASS, "%e", a);
+    if(minimum > -2*M_PI){
+      a += step_size;
+      step_size /= 2;
+    }
+    else{
+      upper_b_limit = min_loc;
+      printf("%.9f %.9f\n", a, minimum);
+    }
   }
   return 0;
 }
